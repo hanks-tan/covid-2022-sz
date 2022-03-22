@@ -2,6 +2,7 @@ import dataHelper
 
 record_dict = {
   #时间是公众号文章的发布日期
+  '20220322': 'https://mp.weixin.qq.com/s/xEVWm4Rel2vd_bACDASY4w',
   '20220321': 'https://mp.weixin.qq.com/s/fZ3fQek0kKfBMXYvyIeg4Q',
   '20220320': 'https://mp.weixin.qq.com/s/c2AjT8UMAM40SdJVmN4b2g',
   '20220319': 'https://mp.weixin.qq.com/s/hXwC8qdDhVvFzBa0RGXIEw',

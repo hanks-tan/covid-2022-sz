@@ -3,10 +3,9 @@ import requests
 from bs4 import BeautifulSoup
 import re
 import datetime
-import merge
 
 # # 文章地址
-# person_url = 'https://mp.weixin.qq.com/s/c2AjT8UMAM40SdJVmN4b2g'
+person_url = 'http://127.0.0.1:5500/3.19.html'
 # 查询接口
 api_url = 'https://restapi.amap.com/v3/place/text?parameters'
 
@@ -21,6 +20,50 @@ def formatDate(date):
   d = datetime.date(date[0], date[1], date[2])
   return d.isoformat()
 
+def findPersons (doms):
+  p_list = doms.find_all('p')
+  persons = [] # 确诊病例列表
+  no = ''
+  flag = None
+  for p in p_list:
+    text = p.getText()
+    if (flag == None or flag):
+      if (re.findall('^病例\d+', text)):
+        if(re.findall('^病例\d+至病例\d+', text)):
+          no = formatTogether(text)
+        else:
+          no = text
+        flag = False
+    else:
+      if (re.findall('男|女', text) and type(no) == str):
+        text = text.replace(' ', '').replace('，',',').replace('。', '')
+        info = no + ',' + text
+        persons.append(info)
+        flag = True
+      elif(type(no) == list):
+        address = ''
+        res = re.findall('\w+区',text)
+        if(len(res) > 0):
+          address = res[0]
+        thispersons = ['%s,,,%s'%(i,address) for i in no]
+        persons = persons + thispersons
+        flag = True
+      elif(text.startswith('病例')):
+        print('未闭合', no)
+        flag = True
+  
+  return persons
+
+def formatTogether(text):
+  reg = '(?<=病例)\d+'
+  result = re.findall(reg, text)
+  if(len(result) > 0):
+    start = int(result[0])
+    end = int(result[1])
+    persons = ['病例' + str(i) for i in list(range(start, end + 1))]
+    return persons
+  
+
 def getDayDetail (url):
   headers = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.51 Safari/537.36',
@@ -31,18 +74,9 @@ def getDayDetail (url):
   resp = requests.get(url, headers)
 
   bsobj = BeautifulSoup(resp.content, 'lxml')
+  
+  persons = findPersons(bsobj)
 
-  p_list = bsobj.find_all('p')
-  persons = [] # 确诊病例列表
-  no = ''
-  for p in p_list:
-    text = p.getText()
-    if (text.startswith('病例')):
-      no = text
-    if (text.startswith('男') or text.startswith('女')):
-      text = text.replace(' ', '').replace('，',',').replace('。', '')
-      text = no + ',' + text
-      persons.append(text)
   
   # 发布时间
   em_list = bsobj.find_all('em')
@@ -109,13 +143,13 @@ def export (person_url):
     f.write(line)
   print('导出完成')
 
-if __name__ == '__main__':
-  url, isMerge = sys.argv[1:]
-  if (url) :
-    export(url)
-    print(url)
-    if (isMerge == 'm'):
-      merge.main()
+# if __name__ == '__main__':
+#   url, isMerge = sys.argv[1:]
+#   if (url) :
+#     export(url)
+#     print(url)
+#     if (isMerge == 'm'):
+#       merge.main()
 
 
-# export(person_url)
+export(person_url)
