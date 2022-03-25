@@ -146,7 +146,7 @@ def export (person_url):
 
   outfile = './output/' + date + '.csv'
   f = open(outfile, 'w', encoding='utf-8')
-  head = ['no', 'sex', 'age', 'address', 'x', 'y' 'date']
+  head = ['no', 'sex', 'age', 'address', 'x', 'y', 'date']
   f.write(','.join(head) + '\n')
 
   address_dict = {}
