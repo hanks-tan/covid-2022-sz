@@ -6,7 +6,7 @@ import datetime
 import merge
 
 # # 文章地址
-# person_url = 'http://127.0.0.1:5500/3.19.html'
+# person_url = 'http://127.0.0.1:5500/0321.html'
 # 查询接口
 api_url = 'https://restapi.amap.com/v3/place/text?parameters'
 
@@ -38,7 +38,7 @@ def findPersons (doms):
       continue
     if (flag == None or flag):
       if (re.findall('^病例\d+', text)):
-        if(re.findall('^病例\d+至病例\d+', text)):
+        if(re.findall('^病例\d+至(病例)?\d+', text)):
           no = formatTogether(text)
         else:
           no = text
@@ -78,7 +78,7 @@ def findPersons (doms):
 
 # 格式化处理病例XX至病例XX
 def formatTogether(text):
-  reg = '(?<=病例)\d+'
+  reg = '\d+'
   result = re.findall(reg, text)
   if(len(result) > 0):
     start = int(result[0])
@@ -165,14 +165,16 @@ def export (person_url):
     info = person_info[:3] + [address, location[0], location[1], date]
     line = ','.join(info) + '\n'
     f.write(line)
+  f.close()
   print('导出完成')
 
 if __name__ == '__main__':
-  url, isMerge = sys.argv[1:]
+  args = sys.argv[1:]
+  url = args[0]
   if (url) :
     export(url)
     print(url)
-    if (isMerge == 'm'):
+    if (len(args) >= 2 and args[1] == 'm'):
       merge.main()
 
 
